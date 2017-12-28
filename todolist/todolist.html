@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="vue.js"></script>
+</head>
+<style>
+    *{
+        margin:0;
+        padding:0;
+        list-style: none;
+    }
+    #app{
+        width: 300px;
+        height:auto;
+        margin: 0 auto;
+    }
+    input[type="text"]{
+        width: 100%;
+        height:30px;
+        margin: 20px 0;
+        border-radius: 5px;
+    }
+    .list{
+        width:100%;
+        height: auto;
+    }
+    .list li{
+        width: 100%;
+        height:30px;
+        border-bottom: 1px solid #ccc;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .list li .tag{
+        width:15px;
+        height:15px;
+        border-radius: 50%;
+        background: red;
+        cursor: pointer;
+    }
+    .list li p{
+        width:80%;
+        height:100%;
+        line-height: 30px;
+    }
+    .active{
+        background: palegreen!important;
+    }
+    .aa{
+        display: flex;
+        justify-content: flex-end;
+    }
+    input[type="button"]{
+        background: none;
+        border: none;
+        margin-right: 10px;
+        outline: none;
+        cursor: pointer;
+    }
+    .check{
+        color: #cccccc!important;
+    }
+    .test{
+        width:100%;
+        height:100%;
+    }
+    .del{
+        cursor: pointer;
+    }
+</style>
+<body>
+    <div id="app">
+        <input type="text" v-model="con" @keyup.enter="submit" v-focus>
+        <div class="aa">
+            <input type="button" @click="changestatus('all')" value="全部" :class="status=='all'?'check':''">
+            <input type="button" @click="changestatus('0')" value="未完成" :class="status=='0'?'check':''">
+            <input type="button" @click="changestatus('1')" value="已完成" :class="status=='1'?'check':''">
+        </div>
+
+        <ul class="list">
+            <li v-for="item in datas" v-if="item.edit">
+                    <span class="tag" @click="changestate(item)" :class="item.status=='1'?'active':''"></span>
+                    <p @click="edit(item)">{{item.title}}</p>
+                    <span class="del" @click="del(item.id)">删除</span>
+            </li>
+            <li v-else="item.edit">
+                <input type="text" v-model="item.title" @blur="edit(item)">
+            </li>
+        </ul>
+        <div v-show="all.length==0">没有数据</div>
+    </div>
+    <script>
+        Vue.directive('focus',{
+            inserted:function (val) {
+                val.focus();
+            }
+        })
+        new Vue({
+            el:"#app",
+            data:{
+                all:[],
+                con:'',
+                status:"all"
+            },
+            methods:{
+                changestatus(a){
+                    this.status = a;
+                },
+                changestate(val){
+                    if(val.status==0){
+                        val.status=1;
+                    }else if(val.status==1){
+                        val.status=0;
+                    }
+                },
+                submit(){
+                    if(!this.con){
+                        alert("请输入内容");
+                        return;
+                    }
+                    let obj = {};
+                    obj.id=Math.random()+new Date().getTime();
+                    obj.title = this.con;
+                    obj.status = 0;
+                    obj.edit=true;
+                    this.all.push(obj);
+                    this.con=""
+                },
+                del(id){
+                    this.all = this.all.filter(ele=>{
+                        return ele.id!=id;
+                    })
+                },
+                edit(obj){
+                    obj.edit = !obj.edit;
+                }
+            },
+            computed:{
+                datas(){
+                    return this.all.filter((ele)=>{
+                        if(this.status=="all"){
+                            return ele;
+                        }else{
+                            return ele.status==this.status;
+                        }
+                    })
+                }
+            }
+        })
+    </script>
+</body>
+</html>
